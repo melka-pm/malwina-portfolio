@@ -276,11 +276,12 @@
      STAR LISTS  (Results + What I learned) — every item identical
      ============================================================ */
   .list-results { grid-column: 1 / 13; }
-  .star-list.list-results li {
-    font-size: clamp(1.3rem, 1rem + 1.3vw, 2.1rem);
-    line-height: 1.35;
-    padding-block: clamp(1rem, 2.2vw, 1.7rem);
+  .star-list.list-results li,
+  .star-list.list-learned li {
+    font-size: clamp(1.2rem, 1rem + 0.8vw, 1.625rem);   /* 26px on desktop */
+    line-height: 1.4;
   }
+  .star-list.list-results li { padding-block: clamp(1rem, 2.2vw, 1.7rem); }
   .list-learned { grid-column: 1 / 10; }
   .star-list { list-style: none; margin: 0; padding: 0; }
   .star-list li {
