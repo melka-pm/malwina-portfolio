@@ -275,7 +275,12 @@
   /* ============================================================
      STAR LISTS  (Results + What I learned) — every item identical
      ============================================================ */
-  .list-results { grid-column: 4 / 12; }
+  .list-results { grid-column: 1 / 13; }
+  .list-results li {
+    font-size: clamp(1.3rem, 1rem + 1.3vw, 2.1rem);
+    line-height: 1.35;
+    padding-block: clamp(1rem, 2.2vw, 1.7rem);
+  }
   .list-learned { grid-column: 1 / 10; }
   .star-list { list-style: none; margin: 0; padding: 0; }
   .star-list li {
@@ -561,7 +566,7 @@
     <ul class="star-list list-results">
       <li><span class="star">&#10035;</span><span>Weekly C-level status: from up to <span class="hl">60 minutes to about 15 minutes of review</span></span></li>
       <li><span class="star">&#10035;</span><span>Functional specification: from hours or days of manual writing to minutes of generation plus 30 to 60 minutes of verification</span></li>
-      <li><span class="star">&#10035;</span><span><span class="hl">17 specifications, 16 client status summaries, and 60+ daily notes</span> produced since April</span></li>
+      <li><span class="star">&#10035;</span><span><span class="hl">17 specifications, 16 client status summaries, and 40+ daily notes</span> produced since April</span></li>
       <li><span class="star">&#10035;</span><span>Edge cases and open questions surfaced at the requirements stage, before development, not during it</span></li>
     </ul>
   </div>
@@ -576,7 +581,7 @@
       <li><span class="star">&#10035;</span><span><span class="hl">Context is KING;</span> automations without a knowledge base are demos, not systems.</span></li>
       <li><span class="star">&#10035;</span><span><span class="hl">Verification is the bottleneck</span> nobody talks about.</span></li>
       <li><span class="star">&#10035;</span><span>Building a working system takes time, and <span class="hl">there is no universal AI workflow yet</span>; most companies have no rules for this at all, so you test, fail, and iterate.</span></li>
-      <li><span class="star">&#10035;</span><span><span class="hl">Brain fog is real</span>: more generated content means more decisions and faster burnout if you don't manage it.</span></li>
+      <li><span class="star">&#10035;</span><span><span class="hl">Brain fry is real</span>: more generated content means more decisions and faster burnout if you don't manage it.</span></li>
       <li><span class="star">&#10035;</span><span>And the biggest shift: as AI speeds up development, <span class="hl">the bottleneck moves to knowing what to build and for whom.</span> Requirements are becoming more important, not less.</span></li>
     </ul>
   </div>
