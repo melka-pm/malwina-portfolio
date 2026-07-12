@@ -1,5 +1,589 @@
 <!doctype html>
 <html lang="en">
-<head><meta charset="utf-8"><title>Malwina Charko</title></head>
-<body><!-- placeholder — full page coming next --></body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Malwina Charko — How I built an AI operating system</title>
+
+<!-- Google Fonts: Fraunces (editorial display serif) + Space Grotesk (grotesque sans) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ============================================================
+     THEME TOKENS  — change the whole look from here
+     ============================================================ */
+  :root {
+    --bg:      #FAF7F2;               /* warm ivory */
+    --ink:     #1F1189;               /* ultramarine navy */
+    --ink-70:  rgba(31, 17, 137, 0.66);
+    --ink-45:  rgba(31, 17, 137, 0.45);
+    --ink-14:  rgba(31, 17, 137, 0.14); /* hairlines */
+    --sel:     #CD9FCC;               /* mauve selection */
+
+    --serif: "Fraunces", Georgia, "Times New Roman", serif;
+    --sans:  "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+    --col:      760px;   /* reading column */
+    --gutter:   clamp(20px, 5vw, 40px);
+    --section-y: clamp(3.5rem, 8vw, 6.5rem);
+    --para-gap:  1.15em; /* consistent paragraph rhythm */
+  }
+
+  /* ---- selection delight ---- */
+  ::selection     { background: var(--sel); color: var(--ink); }
+  ::-moz-selection{ background: var(--sel); color: var(--ink); }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: clamp(1rem, 0.96rem + 0.3vw, 1.15rem);
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* ============================================================
+     LAYOUT
+     ============================================================ */
+  .wrap { max-width: var(--col); margin: 0 auto; padding-inline: var(--gutter); }
+
+  section { padding-block: var(--section-y); }
+  section + section { border-top: 1px solid var(--ink-14); }
+
+  p { margin: 0 0 var(--para-gap); }
+  p:last-child { margin-bottom: 0; }
+
+  a { color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+
+  /* ============================================================
+     TYPE PRIMITIVES
+     ============================================================ */
+  .h-section {
+    font-family: var(--serif);
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-size: clamp(2rem, 1.4rem + 3vw, 3.3rem);
+    line-height: 1.06;
+    letter-spacing: -0.015em;
+    margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+  }
+  .h-section em { font-style: italic; font-weight: 500; }
+
+  /* small quiet kicker (uppercase eyebrow) */
+  .kicker {
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 0.78rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-70);
+    margin: 0 0 clamp(1rem, 2vw, 1.5rem);
+  }
+  .kicker .star { color: var(--ink); margin-right: 0.5em; }
+
+  /* the playful lowercase lead-in */
+  .kicker-quiet {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(1.05rem, 1rem + 0.6vw, 1.35rem);
+    color: var(--ink-70);
+    margin: 0 0 0.4em;
+    text-transform: lowercase;
+  }
+
+  /* ============================================================
+     HERO
+     ============================================================ */
+  .hero { padding-block: clamp(4.5rem, 10vw, 8.5rem) var(--section-y); }
+
+  .hero-title {
+    font-family: var(--serif);
+    font-optical-sizing: auto;
+    font-weight: 500;
+    font-size: clamp(2.7rem, 1.6rem + 6vw, 5.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin: 0 0 clamp(1.75rem, 4vw, 2.75rem);
+    max-width: 15ch;
+  }
+  .hero-title em { font-style: italic; font-weight: 500; }
+
+  .hero-sub {
+    font-size: clamp(1.15rem, 1.05rem + 0.7vw, 1.5rem);
+    line-height: 1.5;
+    color: var(--ink-70);
+    max-width: 54ch;
+    margin: 0;
+  }
+
+  /* ============================================================
+     STANDALONE EMPHASIS LINE  ("My job: deliver anyway.")
+     ============================================================ */
+  .punch {
+    font-family: var(--serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(1.5rem, 1.2rem + 1.6vw, 2.25rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: clamp(1.75rem, 3vw, 2.5rem) 0 0;
+  }
+
+  /* ============================================================
+     STACK LINE
+     ============================================================ */
+  .stack {
+    font-size: 0.98rem;
+    color: var(--ink-70);
+    border-left: 2px solid var(--ink);
+    padding-left: 1.1rem;
+    margin: 0 0 clamp(2.5rem, 5vw, 3.75rem);
+    max-width: 60ch;
+  }
+  .stack b { color: var(--ink); font-weight: 500; }
+
+  /* ============================================================
+     NUMBERED BUILD ITEMS  — every item identical
+     ============================================================ */
+  .build { list-style: none; margin: 0; padding: 0; }
+
+  .build-item {
+    display: grid;
+    grid-template-columns: minmax(0, max-content) 1fr;
+    column-gap: clamp(1.25rem, 3vw, 2.5rem);
+    padding-block: clamp(1.75rem, 3.5vw, 2.5rem);
+  }
+  .build-item + .build-item { border-top: 1px solid var(--ink-14); }
+
+  .build-num {
+    font-family: var(--serif);
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-size: clamp(2.2rem, 1.5rem + 3vw, 3.6rem);
+    line-height: 0.9;
+    color: var(--ink-45);
+    font-variant-numeric: lining-nums;
+  }
+
+  .build-title {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(1.3rem, 1.15rem + 0.7vw, 1.7rem);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin: 0.1em 0 0.6em;
+  }
+  .build-body p { margin: 0; }
+
+  /* ============================================================
+     STAR LISTS  (Results + What I learned) — every item identical
+     ============================================================ */
+  .star-list { list-style: none; margin: 0; padding: 0; }
+  .star-list li {
+    display: grid;
+    grid-template-columns: 1.6em 1fr;
+    column-gap: 0.6em;
+    align-items: baseline;
+    padding-block: clamp(0.85rem, 2vw, 1.15rem);
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+  .star-list li + li { border-top: 1px solid var(--ink-14); }
+  .star-list .star {
+    font-family: var(--serif);
+    font-size: 1.35em;
+    line-height: 1;
+    color: var(--ink);
+    transform: translateY(0.08em);
+  }
+
+  /* ============================================================
+     CALLOUT  (The catch that paid for itself)
+     ============================================================ */
+  .callout {
+    border: 1px solid var(--ink);
+    border-radius: 16px;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    background: transparent;
+  }
+  .callout p { font-size: 1.05rem; }
+
+  /* ============================================================
+     DIAGRAM
+     ============================================================ */
+  .diagram { margin: 0 0 clamp(2.5rem, 5vw, 3.75rem); }
+  .diagram svg { width: 100%; height: auto; display: block; }
+
+  .dg-pill { fill: var(--bg); stroke: var(--ink); stroke-width: 1.5; }
+  .dg-core { fill: var(--ink); }
+  .dg-line { fill: none; stroke: var(--ink); stroke-width: 1.5; }
+  .dg-arrow { fill: var(--ink); }
+  .dg-t     { fill: var(--ink); font-family: var(--sans); font-size: 21px; font-weight: 500; }
+  .dg-t-inv { fill: var(--bg);  font-family: var(--sans); font-size: 21px; font-weight: 500; }
+  .dg-t-sub { fill: var(--bg);  font-family: var(--sans); font-size: 15px; font-weight: 400; opacity: 0.85; }
+
+  .diagram figcaption {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--ink-70);
+    text-align: center;
+  }
+
+  /* ============================================================
+     FOOTER
+     ============================================================ */
+  .footer { padding-block: var(--section-y); }
+  .footer-card {
+    display: flex;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: center;
+  }
+  .portrait {
+    flex: none;
+    width: clamp(150px, 30vw, 220px);
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 16px;
+    display: block;
+  }
+  .footer-bio p { font-size: 1.05rem; }
+  .footer-bio .name { font-family: var(--serif); font-weight: 500; }
+  .footer-link { display: inline-block; margin-top: 0.5rem; font-weight: 500; }
+  .footer-link .arrow { font-family: var(--serif); }
+
+  .colophon {
+    margin-top: clamp(3rem, 7vw, 5rem);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--ink-45);
+    text-transform: lowercase;
+  }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 640px) {
+    .build-item {
+      grid-template-columns: 1fr;
+      row-gap: 0.4rem;
+    }
+    .build-num { font-size: 2.4rem; }
+    .footer-card { flex-direction: column; align-items: flex-start; }
+    .portrait { width: clamp(160px, 55vw, 220px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================= HERO ======================= -->
+<header class="hero">
+  <div class="wrap">
+    <h1 class="hero-title">How I built an AI operating system for a recovery project that had <em>nothing</em></h1>
+    <p class="hero-sub">
+      I'm a project manager who was handed a revived healthcare project with a vague scope,
+      no business analyst, and no company workflows. Instead of drowning, I built an AI-powered
+      operating system that ran my documentation, reporting, and requirements pipeline. This is
+      how, and what I learned. And if this is what I can do in worst-case conditions, imagine
+      what I can do in normal ones.
+    </p>
+  </div>
+</header>
+
+<!-- ======================= THE SITUATION ======================= -->
+<section>
+  <div class="wrap">
+    <p class="kicker-quiet">houston, we have</p>
+    <h2 class="h-section">The Situation</h2>
+    <p>
+      A UK client was building a platform connecting carers, doctors, and nurses. The project
+      had been paused for almost a year. When it came back, the previous project manager was gone.
+      I inherited: four developers (2 backend, 2 frontend), a designer, a vague and incomplete
+      scope, no business analyst, no onboarding, a client with very limited availability, and
+      stakeholders who had lost confidence in the project and held no hard decision-making power.
+      On top of that, my company had no established AI workflows and was mid-migration between
+      project management tools.
+    </p>
+    <p class="punch">My job: deliver anyway.</p>
+  </div>
+</section>
+
+<!-- ======================= WHAT I BUILT ======================= -->
+<section>
+  <div class="wrap">
+    <p class="kicker"><span class="star">&#10035;</span>What I Built</p>
+    <h2 class="h-section">The system, in six moves</h2>
+
+    <p class="stack">
+      <b>Stack:</b> Claude (paid plan, Projects + connectors), Read.ai, Slack, Gmail.
+      No engineering support, no extra budget, no extra time.
+    </p>
+
+    <!-- ---------- INLINE SYSTEM DIAGRAM (navy on ivory) ---------- -->
+    <figure class="diagram">
+      <svg viewBox="0 0 820 400" xmlns="http://www.w3.org/2000/svg" role="img"
+           aria-label="Four sources — Read.ai, Slack, Gmail and meeting transcripts — feed a central context base (a Claude Project), which produces four outputs: daily notes, client summaries, specifications and C-level reports.">
+        <defs>
+          <marker id="dgArrow" markerWidth="9" markerHeight="9" refX="7" refY="3"
+                  orient="auto" markerUnits="strokeWidth">
+            <path class="dg-arrow" d="M0,0 L7,3 L0,6 Z"></path>
+          </marker>
+        </defs>
+
+        <!-- connectors: sources -> core -->
+        <g class="dg-line" marker-end="url(#dgArrow)">
+          <path d="M212,47  C270,47  268,200 306,200"></path>
+          <path d="M212,141 C270,141 268,200 306,200"></path>
+          <path d="M212,235 C270,235 268,200 306,200"></path>
+          <path d="M212,329 C270,329 268,200 306,200"></path>
+        </g>
+        <!-- connectors: core -> outputs -->
+        <g class="dg-line" marker-end="url(#dgArrow)">
+          <path d="M514,200 C552,200 550,47  606,47"></path>
+          <path d="M514,200 C552,200 550,141 606,141"></path>
+          <path d="M514,200 C552,200 550,235 606,235"></path>
+          <path d="M514,200 C552,200 550,329 606,329"></path>
+        </g>
+
+        <!-- SOURCES (left column) -->
+        <g text-anchor="middle" dominant-baseline="middle">
+          <rect class="dg-pill" x="12"  y="20"  width="200" height="54" rx="27"></rect>
+          <text class="dg-t" x="112" y="48">Read.ai</text>
+          <rect class="dg-pill" x="12"  y="114" width="200" height="54" rx="27"></rect>
+          <text class="dg-t" x="112" y="142">Slack</text>
+          <rect class="dg-pill" x="12"  y="208" width="200" height="54" rx="27"></rect>
+          <text class="dg-t" x="112" y="236">Gmail</text>
+          <rect class="dg-pill" x="12"  y="302" width="200" height="54" rx="27"></rect>
+          <text class="dg-t" x="112" y="323">Meeting</text>
+          <text class="dg-t" x="112" y="345">transcripts</text>
+        </g>
+
+        <!-- CORE -->
+        <g text-anchor="middle" dominant-baseline="middle">
+          <rect class="dg-core" x="306" y="150" width="208" height="100" rx="18"></rect>
+          <text class="dg-t-inv" x="410" y="192">Context Base</text>
+          <text class="dg-t-sub" x="410" y="216">(Claude Project)</text>
+        </g>
+
+        <!-- OUTPUTS (right column) -->
+        <g text-anchor="middle" dominant-baseline="middle">
+          <rect class="dg-pill" x="608" y="20"  width="200" height="54" rx="27"></rect>
+          <text class="dg-t" x="708" y="48">Daily notes</text>
+          <rect class="dg-pill" x="608" y="114" width="200" height="54" rx="27"></rect>
+          <text class="dg-t" x="708" y="142">Client summaries</text>
+          <rect class="dg-pill" x="608" y="208" width="200" height="54" rx="27"></rect>
+          <text class="dg-t" x="708" y="236">Specifications</text>
+          <rect class="dg-pill" x="608" y="302" width="200" height="54" rx="27"></rect>
+          <text class="dg-t" x="708" y="330">C-level reports</text>
+        </g>
+      </svg>
+      <figcaption>Sources feed one central context base; the context base drives every output.</figcaption>
+    </figure>
+    <!-- ---------- /DIAGRAM ---------- -->
+
+    <ol class="build">
+      <li class="build-item">
+        <div class="build-num">01</div>
+        <div class="build-body">
+          <h3 class="build-title">A context base first.</h3>
+          <p>
+            Before any automation, I built the project's knowledge base: scope of work, plus
+            transcripts from every meeting type (dailies and refinements with the dev team, client
+            calls, walkthrough sessions with the designer). Context is KING. Without it, every
+            automation is a toy.
+          </p>
+        </div>
+      </li>
+      <li class="build-item">
+        <div class="build-num">02</div>
+        <div class="build-body">
+          <h3 class="build-title">Daily notes on autopilot.</h3>
+          <p>
+            Our early dailies were dense: half standup, half refinement, often splitting into
+            subgroups to work through the build in detail. I built a prompt that turns transcripts
+            into structured notes (who does what, next actions) and posts them as a draft straight
+            to the Slack channel. I review and send. Nothing gets lost, and in a project with this
+            much moving, things used to get lost weekly. Over 40 daily notes produced this way and
+            counting.
+          </p>
+        </div>
+      </li>
+      <li class="build-item">
+        <div class="build-num">03</div>
+        <div class="build-body">
+          <h3 class="build-title">Client follow-ups that write themselves.</h3>
+          <p>
+            Read.ai records the call, Claude drafts the summary email in Gmail. After every client
+            meeting, the follow-up is waiting for me instead of hanging over me. 16 client status
+            summaries and counting.
+          </p>
+        </div>
+      </li>
+      <li class="build-item">
+        <div class="build-num">04</div>
+        <div class="build-body">
+          <h3 class="build-title">A requirements engine.</h3>
+          <p>
+            The designer walked the client through the system screen by screen; those recorded
+            sessions became my raw material. I iterated a prompt that turns them into functional
+            specifications, and this was the hard part: AI loves generating volume nobody reads. It
+            took many iterations to get essence instead of noise. The prompt also flags assumptions,
+            edge cases, and open questions automatically, so the client gets pinged at the
+            requirements stage, not mid-development. A spec that would take hours to days manually
+            now takes minutes to generate and 30 to 60 minutes to verify. 17 specifications written
+            since April.
+          </p>
+        </div>
+      </li>
+      <li class="build-item">
+        <div class="build-num">05</div>
+        <div class="build-body">
+          <h3 class="build-title">Designing the admin panel from the ground up.</h3>
+          <p>
+            For the admin panel, I fed the knowledge base every existing specification plus the
+            contract and client conversations, and asked Claude to propose what the panel should do
+            and which features it needed. Crucially, I had it mark which features fell outside the
+            scope of work and prioritize the rest (P0, P1, P2). That output drove the client
+            conversations about the panel and became the basis for the designer's clickable
+            prototype.
+          </p>
+        </div>
+      </li>
+      <li class="build-item">
+        <div class="build-num">06</div>
+        <div class="build-body">
+          <h3 class="build-title">C-level reporting without the Friday dread.</h3>
+          <p>
+            Weekly board updates in a fixed format used to take me up to an hour, at 4 PM on a
+            Friday. Now Claude reads the daily notes channel and the client summaries and drafts the
+            update in the required format, waiting on the right Slack channel. I verify in about 15
+            minutes.
+          </p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- ======================= HOW I DECIDED ======================= -->
+<section>
+  <div class="wrap">
+    <p class="kicker"><span class="star">&#10035;</span>Method</p>
+    <h2 class="h-section">How I decided what to automate</h2>
+    <p>
+      My criteria were simple: repetitive, text-heavy, and expensive when dropped. Documentation
+      and reporting scored highest, so they went first. What stayed deliberately human: every
+      decision, every client conversation, and the verification of every single AI output. That's
+      the part nobody puts on LinkedIn. We can generate a million pages in minutes, but verification
+      is the real work now, and it takes real time. AI drafts. I sign.
+    </p>
+  </div>
+</section>
+
+<!-- ======================= THE CATCH ======================= -->
+<section>
+  <div class="wrap">
+    <p class="kicker"><span class="star">&#10035;</span>Proof</p>
+    <h2 class="h-section">The catch that paid for itself</h2>
+    <div class="callout">
+      <p>
+        The clearest proof of why verification and requirements work matters: while mapping order,
+        visit, payment, and payout statuses into a single cross-level consistency table, the prompt
+        surfaced that there was no distinction between a visit taking place and the carer being paid.
+        As written, the backend would have released payouts the moment a visit ended, removing the
+        48-hour grace period needed to catch a no-show or dispute before money left the platform.
+      </p>
+      <p>
+        We introduced a separate "Finished" state (payout Processing, 48h hold) versus "Completed"
+        (payout Paid), and confirmed "In Progress" belongs only at the visit level, not the order
+        level, before any of it reached development. A logic gap caught on paper instead of in
+        production, with real money on the line.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= RESULTS ======================= -->
+<section>
+  <div class="wrap">
+    <p class="kicker"><span class="star">&#10035;</span>Results</p>
+    <h2 class="h-section">What it added up to</h2>
+    <ul class="star-list">
+      <li><span class="star">&#10035;</span><span>Weekly C-level status: from up to 60 minutes to about 15 minutes of review</span></li>
+      <li><span class="star">&#10035;</span><span>Functional specification: from hours or days of manual writing to minutes of generation plus 30 to 60 minutes of verification</span></li>
+      <li><span class="star">&#10035;</span><span>17 specifications, 16 client status summaries, and 60+ daily notes produced since April</span></li>
+      <li><span class="star">&#10035;</span><span>Edge cases and open questions surfaced at the requirements stage, before development, not during it</span></li>
+      <li><span class="star">&#10035;</span><span>A payout-logic gap caught before development, protecting the client's 48-hour dispute window</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================= WHAT I LEARNED ======================= -->
+<section>
+  <div class="wrap">
+    <p class="kicker"><span class="star">&#10035;</span>The honest part</p>
+    <h2 class="h-section">What I learned</h2>
+    <ul class="star-list">
+      <li><span class="star">&#10035;</span><span>Context is king; automations without a knowledge base are demos, not systems.</span></li>
+      <li><span class="star">&#10035;</span><span>Verification is the bottleneck nobody talks about.</span></li>
+      <li><span class="star">&#10035;</span><span>Building a working system takes time, and there is no universal AI workflow yet; most companies have no rules for this at all, so you test, fail, and iterate.</span></li>
+      <li><span class="star">&#10035;</span><span>Brain fog is real: more generated content means more decisions and faster burnout if you don't manage it.</span></li>
+      <li><span class="star">&#10035;</span><span>And the biggest shift: as AI speeds up development, the bottleneck moves to knowing what to build and for whom. Requirements are becoming more important, not less.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ======================= WHAT'S NEXT ======================= -->
+<section>
+  <div class="wrap">
+    <p class="kicker"><span class="star">&#10035;</span>What's next</p>
+    <h2 class="h-section">Version two</h2>
+    <p>
+      I'm currently testing spec-driven development, where specifications drive work on real
+      repositories. The system I built was version one. I'm more interested in what version two
+      looks like.
+    </p>
+  </div>
+</section>
+
+<!-- ======================= FOOTER ======================= -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-card">
+      <!--
+        ============================================================
+        PHOTO GOES HERE.
+        The file must be named  malwina.jpeg  and sit in this SAME
+        folder as index.html. It's already here. To swap the image,
+        replace malwina.jpeg (or change the src below).
+        It is cropped to a 4:5 portrait card via CSS (object-fit).
+        ============================================================
+      -->
+      <img class="portrait" src="malwina.jpeg" alt="Malwina Charko">
+      <div class="footer-bio">
+        <p>
+          <span class="name">Malwina Charko.</span> Project manager, and builder of internal AI
+          systems. 8+ years in IT delivery across healthcare, fintech, and enterprise. Open to
+          product, process and business analysis roles where requirements and systems thinking
+          matter.
+        </p>
+        <a class="footer-link" href="https://www.linkedin.com/in/malwina-charko/" target="_blank" rel="noopener">
+          LinkedIn <span class="arrow">&rarr;</span>
+        </a>
+      </div>
+    </div>
+    <p class="colophon">this one pager was designed and shipped by me with claude code</p>
+  </div>
+</footer>
+
+</body>
 </html>
