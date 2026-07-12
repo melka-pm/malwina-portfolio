@@ -76,11 +76,13 @@
     font-family: var(--serif);
     font-optical-sizing: auto;
     font-weight: 500;
-    font-size: clamp(2.5rem, 0.6rem + 7.4vw, 6.6rem);
+    font-size: clamp(2.5rem, 0.4rem + 8vw, 7rem);
     line-height: 1.0;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;   /* fallback; JS stretches each head to full width */
     margin: 0 0 clamp(1.5rem, 3vw, 2.5rem);
+    white-space: nowrap;
   }
+  @media (max-width: 820px) { .h-wide { white-space: normal; } }
   .h-mid {
     font-family: var(--serif);
     font-optical-sizing: auto;
@@ -603,6 +605,32 @@
     <p class="colophon">this one pager was designed and shipped by me with claude code</p>
   </div>
 </footer>
+
+<script>
+  /* Stretch each full-width heading (.h-wide) so its letters span the whole
+     column. Pure presentation; if JS is off the headings just render untracked. */
+  (function () {
+    function fitWideHeads() {
+      document.querySelectorAll('.h-wide').forEach(function (h) {
+        h.style.letterSpacing = 'normal';
+        var range = document.createRange();
+        range.selectNodeContents(h);
+        var textW = range.getBoundingClientRect().width;
+        var avail = h.getBoundingClientRect().width;
+        var n = h.textContent.trim().length;
+        if (n > 1 && avail > textW) {
+          var ls = (avail - textW) / n;                  // fill to full width
+          var cap = 0.32 * parseFloat(getComputedStyle(h).fontSize);
+          if (ls > cap) ls = cap;                         // keep tracking sane
+          h.style.letterSpacing = ls + 'px';
+        }
+      });
+    }
+    window.addEventListener('load', fitWideHeads);
+    window.addEventListener('resize', fitWideHeads);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitWideHeads);
+  })();
+</script>
 
 </body>
 </html>
