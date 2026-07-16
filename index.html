@@ -667,8 +667,8 @@
         var n = h.textContent.trim().length;
         if (n > 1 && avail > textW) {
           var ls = (avail - textW) / n;                  // fill to full width
-          var cap = 0.32 * parseFloat(getComputedStyle(h).fontSize);
-          if (ls > cap) ls = cap;                         // keep tracking sane
+          var cap = 1.5 * parseFloat(getComputedStyle(h).fontSize);
+          if (ls > cap) ls = cap;                         // guard only absurd cases
           h.style.letterSpacing = ls + 'px';
         }
       });
